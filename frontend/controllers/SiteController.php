@@ -10,11 +10,13 @@ use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use common\models\LoginForm;
+use frontend\models\LoginForm;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
+use common\models\Cart;
+use common\models\Product;
 
 /**
  * Site controller
@@ -91,7 +93,7 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+            return $this->redirect(['product/index']);
         }
 
         $model->password = '';
@@ -255,5 +257,40 @@ class SiteController extends Controller
         return $this->render('resendVerificationEmail', [
             'model' => $model
         ]);
+    }
+
+    public function actionOpenCart(){
+        $cartItems = Cart::find()->where(['customer_id'=>'1'])->all();
+        $products = [];
+        $cartTotalPrice = 0;
+        if(!empty($cartItems)){
+            foreach($cartItems as $cartItem){
+                $product = $cartItem->product;
+                if ($product) {
+                    $products[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'image' => Yii::$app->params['backendUrl'].'/' .  $product->image,
+                        'quantity' => $cartItem->quantity,
+                        'price' => $product->price,
+                    ];
+                    $cartTotalPrice += $product->price * $cartItem->quantity;
+                }
+            }
+          
+            $response =[
+                'status' => 1,
+                'message' => 'Cart Items',
+                'data' => $products,
+                'cartTotalPrice' => $cartTotalPrice
+            ];
+        }else{
+            $response =[
+                'status' => 0,
+                'message' => 'Cart Items Not Found',
+            ];
+        }
+
+        return json_encode($response);
     }
 }

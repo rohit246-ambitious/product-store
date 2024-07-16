@@ -9,6 +9,7 @@ use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
+use yii\web\View;
 
 AppAsset::register($this);
 ?>
@@ -18,6 +19,9 @@ AppAsset::register($this);
 <head>
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/2.1.3/jquery.scrollTo.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
@@ -35,7 +39,7 @@ AppAsset::register($this);
         ],
     ]);
     $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
+        ['label' => 'Home', 'url' => ['/product/index']],
         ['label' => 'About', 'url' => ['/site/about']],
         ['label' => 'Contact', 'url' => ['/site/contact']],
     ];
@@ -47,6 +51,7 @@ AppAsset::register($this);
         'options' => ['class' => 'navbar-nav me-auto mb-2 mb-md-0'],
         'items' => $menuItems,
     ]);
+    echo '<div class="btn btn-link cart-button"><i class="bi bi-cart"></i></div>';
     if (Yii::$app->user->isGuest) {
         echo Html::tag('div',Html::a('Login',['/site/login'],['class' => ['btn btn-link login text-decoration-none']]),['class' => ['d-flex']]);
     } else {
@@ -68,7 +73,35 @@ AppAsset::register($this);
         ]) ?>
         <?= Alert::widget() ?>
         <?= $content ?>
-    </div>
+
+        <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-slideout modal-md right">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cartModalLabel">Your Cart</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Cart content will be loaded here via Ajax -->
+                        <div id="cart-content">
+                          
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row w-100">
+                            <div class="col-6">
+                                <span class="total-price"></span>
+                            </div>
+                            <div class="col-6 text-end">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a href="#" class="btn btn-primary">Checkout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 </main>
 
 <footer class="footer mt-auto py-3 text-muted">
@@ -79,6 +112,66 @@ AppAsset::register($this);
 </footer>
 
 <?php $this->endBody() ?>
+
 </body>
 </html>
+<?php
+$this->registerJs("
+$('.cart-button').on('click',function(){
+    console.log('click');
+    $.ajax({
+        url:'".Yii::$app->urlManager->createAbsoluteUrl(['site/open-cart'])."',
+        type:'get',
+        success:function(response){
+           
+            var parsedResponse = JSON.parse(response);
+          
+            if(parsedResponse.status){
+                var data = parsedResponse.data;
+                var totalPrice = parsedResponse.cartTotalPrice;
+                $('#cart-content').empty();
+                data.forEach(function (item) {
+                    var cartItemHtml = '<div class=\"cart-item\" style=\"border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;\">' +
+                    '<img src=\"' + item.image + '\" alt=\"' + item.name + '\" class=\"cart-item-image\">' +
+                    '<div class=\"cart-item-details\">' +
+                    '<h5 class=\"cart-item-name\">' + item.name + '</h5>' +
+                    '<p class=\"cart-item-quantity\">Quantity: ' + item.quantity + '</p>' +
+                    '<p class=\"cart-item-price\">Price: ₹' + (item.price * item.quantity) + '</p>' +
+                    '</div>' +
+                    '</div>';
+
+                    $('#cart-content').append(cartItemHtml);
+                });
+                $('.total-price').html('<strong>Total Price: ₹' + totalPrice + '</strong>');
+                $('#cartModal').modal('show');
+            }
+        }
+
+    });
+});
+
+", View::POS_READY);
+
+$this->registerCss("
+#cartModal .modal-body {
+    overflow-y: auto; /* Enable vertical scrolling if needed */
+    max-height: 60vh; /* Adjust maximum height of modal body */
+}
+
+#cartModal .modal-body img {
+    max-width: 100%; /* Ensure image width does not exceed modal body width */
+    height: auto; /* Maintain image aspect ratio */
+    display: block; /* Center-align the image */
+    margin: 0 auto; /* Center-align the image */
+}
+
+.modal-dialog-slideout.modal-md.right {
+    right: 0;
+    top: 0;
+    margin-right: 0;
+}
+
+")
+?>
+
 <?php $this->endPage();
