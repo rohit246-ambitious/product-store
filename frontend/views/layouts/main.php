@@ -40,8 +40,8 @@ AppAsset::register($this);
     ]);
     $menuItems = [
         ['label' => 'Home', 'url' => ['/product/index']],
-        ['label' => 'About', 'url' => ['/site/about']],
-        ['label' => 'Contact', 'url' => ['/site/contact']],
+        // ['label' => 'About', 'url' => ['/site/about']],
+        // ['label' => 'Contact', 'url' => ['/site/contact']],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
@@ -94,7 +94,7 @@ AppAsset::register($this);
                             </div>
                             <div class="col-6 text-end">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <a href="#" class="btn btn-primary">Checkout</a>
+                                <a href="#" class="btn btn-primary" id="checkout-btn">Checkout</a>
                             </div>
                         </div>
                     </div>
@@ -112,20 +112,16 @@ AppAsset::register($this);
 </footer>
 
 <?php $this->endBody() ?>
-
 </body>
 </html>
 <?php
 $this->registerJs("
 $('.cart-button').on('click',function(){
-    console.log('click');
     $.ajax({
         url:'".Yii::$app->urlManager->createAbsoluteUrl(['site/open-cart'])."',
         type:'get',
         success:function(response){
-           
             var parsedResponse = JSON.parse(response);
-          
             if(parsedResponse.status){
                 var data = parsedResponse.data;
                 var totalPrice = parsedResponse.cartTotalPrice;
@@ -144,6 +140,10 @@ $('.cart-button').on('click',function(){
                 });
                 $('.total-price').html('<strong>Total Price: ₹' + totalPrice + '</strong>');
                 $('#cartModal').modal('show');
+            }else{
+                $('#cart-content').text('Your cart is empty');
+                $('#checkout-btn').addClass('disabled');
+                $('#cartModal').modal('show');
             }
         }
 
@@ -154,15 +154,15 @@ $('.cart-button').on('click',function(){
 
 $this->registerCss("
 #cartModal .modal-body {
-    overflow-y: auto; /* Enable vertical scrolling if needed */
-    max-height: 60vh; /* Adjust maximum height of modal body */
+    overflow-y: auto; 
+    max-height: 60vh; 
 }
 
 #cartModal .modal-body img {
-    max-width: 100%; /* Ensure image width does not exceed modal body width */
-    height: auto; /* Maintain image aspect ratio */
-    display: block; /* Center-align the image */
-    margin: 0 auto; /* Center-align the image */
+    max-width: 100%; 
+    height: auto; 
+    display: block; 
+    margin: 0 auto; 
 }
 
 .modal-dialog-slideout.modal-md.right {
