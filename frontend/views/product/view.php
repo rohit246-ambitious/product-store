@@ -16,8 +16,6 @@ foreach ($product->productImages as $productImage) {
     $allProductImages[] = Html::img($url, ['class' => 'slick-img']);
 }
 
-//echo "<pre>";print_r($allProductImages);exit;
-
 ?>
 <div class="product-view-container">
     <div class = "row no-gutters">
@@ -60,7 +58,7 @@ foreach ($product->productImages as $productImage) {
                                 'infinite' => true,
                                 'autoplay' => true,
                                 'speed' => 200,
-                                'slidesToShow' => 3, // Show 3 images at a time
+                                'slidesToShow' => 3, 
                                 'slidesToScroll' => 1,
                             ],
 
@@ -114,13 +112,12 @@ $this->registerCss("
 }
 
 .thumbnail-images {
-    padding: 1px 7px 1px 7px; /* Add padding to the left and right of each thumbnail image */
+    padding: 1px 7px 1px 7px; 
 }
 
 .slick-img {
-    height: 400px; /* Fixed height for Slick images */
-    //width: auto; /* Maintain aspect ratio */
-    object-fit: cover; /* Ensures the image covers the container while maintaining aspect ratio */
+    height: 400px; 
+    object-fit: cover; 
 }
 
 .thumbnail-images .slick-img {
@@ -128,11 +125,11 @@ $this->registerCss("
     width: auto;
 }
 .product-image-container {
-    max-height: 400px; /* Ensure the container height matches the image height */
+    max-height: 400px; 
 }
 
 .thumbnail-image-container {
-    max-height: 100px; /* Ensure the container height matches the image height */
+    max-height: 100px; 
 }
 ");
 
