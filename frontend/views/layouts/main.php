@@ -139,6 +139,7 @@ $('.cart-button').on('click',function(){
                     $('#cart-content').append(cartItemHtml);
                 });
                 $('.total-price').html('<strong>Total Price: ₹' + totalPrice + '</strong>');
+                $('#checkout-btn').removeClass('disabled');
                 $('#cartModal').modal('show');
             }else{
                 $('#cart-content').text('Your cart is empty');
